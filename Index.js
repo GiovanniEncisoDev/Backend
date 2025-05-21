@@ -13,80 +13,95 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
-  ssl: {
-    rejectUnauthorized: false
-  }
+  ssl: { rejectUnauthorized: false }
 });
 
 // Middlewares
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.static('public'));
 
-// Obtener películas
+// Obtener todas las películas
 app.get('/peliculas', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM peliculas');
-    res.json(result.rows);
+    const { rows } = await pool.query('SELECT * FROM peliculas ORDER BY id ASC');
+    res.json(rows);
   } catch (error) {
-    console.error(error);
+    console.error('Error al obtener películas:', error);
     res.status(500).json({ error: 'Error al obtener películas' });
   }
 });
 
-// Agregar película
+// Agregar nueva película
 app.post('/peliculas', async (req, res) => {
   const { titulo, director, genero, anio, imagen, url } = req.body;
+
+  if (!titulo || !genero) {
+    return res.status(400).json({ error: 'Título y género son obligatorios' });
+  }
+
   try {
     const query = `
       INSERT INTO peliculas (titulo, director, genero, anio, imagen, url)
       VALUES ($1, $2, $3, $4, $5, $6)
     `;
     await pool.query(query, [titulo, director, genero, anio, imagen, url]);
-    res.status(201).json({ mensaje: 'Película agregada' });
+    res.status(201).json({ mensaje: 'Película agregada exitosamente' });
   } catch (error) {
-    console.error(error);
+    console.error('Error al agregar película:', error);
     res.status(500).json({ error: 'Error al agregar película' });
   }
 });
 
-// Modificar película
+// Modificar una película existente
 app.patch('/peliculas/:id', async (req, res) => {
   const { id } = req.params;
-  const { titulo, director, genero, anio } = req.body;
+  const { titulo, director, genero, anio, imagen, url } = req.body;
+
   try {
     const query = `
-      UPDATE peliculas SET titulo = $1, director = $2, genero = $3, anio = $4
-      WHERE idPelicula = $5
+      UPDATE peliculas
+      SET titulo = $1, director = $2, genero = $3, anio = $4, imagen = $5, url = $6
+      WHERE id = $7
     `;
-    await pool.query(query, [titulo, director, genero, anio, id]);
-    res.json({ mensaje: 'Película actualizada' });
+    const result = await pool.query(query, [titulo, director, genero, anio, imagen, url, id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Película no encontrada' });
+    }
+
+    res.json({ mensaje: 'Película actualizada correctamente' });
   } catch (error) {
-    console.error(error);
+    console.error('Error al actualizar película:', error);
     res.status(500).json({ error: 'Error al actualizar película' });
   }
 });
 
-// Eliminar película
+// Eliminar una película
 app.delete('/peliculas/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    await pool.query('DELETE FROM peliculas WHERE idPelicula = $1', [id]);
-    res.json({ mensaje: 'Película eliminada' });
+    const result = await pool.query('DELETE FROM peliculas WHERE id = $1', [id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Película no encontrada' });
+    }
+
+    res.json({ mensaje: 'Película eliminada correctamente' });
   } catch (error) {
-    console.error(error);
+    console.error('Error al eliminar película:', error);
     res.status(500).json({ error: 'Error al eliminar película' });
   }
 });
 
 // Ruta no encontrada
 app.use((req, res) => {
-  res.status(404).send('Ruta no encontrada');
+  res.status(404).json({ error: 'Ruta no encontrada' });
 });
 
 // Iniciar servidor
-app.listen(process.env.PORT, () => {
-  console.log(`Servidor ejecutándose en puerto ${process.env.PORT}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Servidor ejecutándose en puerto ${PORT}`);
 });
