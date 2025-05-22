@@ -16,6 +16,7 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
+
 // Middlewares
 app.use(express.json());
 app.use(cors());
