@@ -19,7 +19,14 @@ const pool = new Pool({
 
 // Middlewares
 app.use(express.json());
-app.use(cors());
+const corsOptions = {
+  origin: 'https://giovanniencisodev.github.io',
+  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type']
+};
+
+app.use(cors(corsOptions));
+
 app.use(morgan('dev'));
 app.use(express.static('public'));
 
