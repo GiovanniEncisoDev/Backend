@@ -91,19 +91,22 @@ app.patch('/peliculas/:id', async (req, res) => {
 // Eliminar una película
 app.delete('/peliculas/:id', async (req, res) => {
   const { id } = req.params;
+  if (!id || typeof id !== 'string') {
+    return res.status(400).json({ error: 'ID inválido o faltante' });
+  }
+
   try {
     const result = await pool.query('DELETE FROM peliculas WHERE id = $1', [id]);
-
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Película no encontrada' });
     }
-
     res.json({ mensaje: 'Película eliminada correctamente' });
   } catch (error) {
     console.error('Error al eliminar película:', error);
     res.status(500).json({ error: 'Error al eliminar película' });
   }
 });
+
 
 // Ruta no encontrada
 app.use((req, res) => {
