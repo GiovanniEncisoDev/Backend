@@ -31,15 +31,17 @@ app.use(morgan('dev'));
 app.use(express.static('public'));
 
 // Obtener todas las películas
+// Obtener todas las películas
 app.get('/peliculas', async (req, res) => {
   try {
-    const { rows } = await pool.query('SELECT * FROM peliculas ORDER BY id ASC');
+    const { rows } = await pool.query('SELECT * FROM peliculas'); // <-- quita el ORDER BY
     res.json(rows);
   } catch (error) {
     console.error('Error al obtener películas:', error);
     res.status(500).json({ error: 'Error al obtener películas' });
   }
 });
+
 
 // Agregar nueva película
 app.post('/peliculas', async (req, res) => {
