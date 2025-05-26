@@ -66,8 +66,10 @@ app.post('/peliculas', async (req, res) => {
 
 // Modificar una película existente
 app.patch('/peliculas/:id', async (req, res) => {
-  const { id } = req.params;
+  const id = parseInt(req.params.id);
   const { titulo, director, genero, anio, imagen, url } = req.body;
+
+  if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
 
   try {
     const query = `
@@ -90,9 +92,9 @@ app.patch('/peliculas/:id', async (req, res) => {
 
 // Eliminar una película
 app.delete('/peliculas/:id', async (req, res) => {
-  const { id } = req.params;
-  if (!id || typeof id !== 'string') {
-    return res.status(400).json({ error: 'ID inválido o faltante' });
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) {
+    return res.status(400).json({ error: 'ID inválido' });
   }
 
   try {
