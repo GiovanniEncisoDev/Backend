@@ -16,9 +16,9 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
-
 // Middlewares
 app.use(express.json());
+
 const corsOptions = {
   origin: 'https://giovanniencisodev.github.io',
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
@@ -26,22 +26,19 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
 app.use(morgan('dev'));
 app.use(express.static('public'));
 
 // Obtener todas las películas
-// Obtener todas las películas
 app.get('/peliculas', async (req, res) => {
   try {
-    const { rows } = await pool.query('SELECT * FROM peliculas'); // <-- quita el ORDER BY
+    const { rows } = await pool.query('SELECT * FROM peliculas');
     res.json(rows);
   } catch (error) {
     console.error('Error al obtener películas:', error);
     res.status(500).json({ error: 'Error al obtener películas' });
   }
 });
-
 
 // Agregar nueva película
 app.post('/peliculas', async (req, res) => {
@@ -66,18 +63,18 @@ app.post('/peliculas', async (req, res) => {
 
 // Modificar una película existente
 app.patch('/peliculas/:id', async (req, res) => {
-  const id = parseInt(req.params.id);
+  const idPelicula = parseInt(req.params.id);
   const { titulo, director, genero, anio, imagen, url } = req.body;
 
-  if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+  if (isNaN(idPelicula)) return res.status(400).json({ error: 'ID inválido' });
 
   try {
     const query = `
       UPDATE peliculas
       SET titulo = $1, director = $2, genero = $3, anio = $4, imagen = $5, url = $6
-      WHERE id = $7
+      WHERE idPelicula = $7
     `;
-    const result = await pool.query(query, [titulo, director, genero, anio, imagen, url, id]);
+    const result = await pool.query(query, [titulo, director, genero, anio, imagen, url, idPelicula]);
 
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Película no encontrada' });
@@ -92,13 +89,13 @@ app.patch('/peliculas/:id', async (req, res) => {
 
 // Eliminar una película
 app.delete('/peliculas/:id', async (req, res) => {
-  const id = parseInt(req.params.id);
-  if (isNaN(id)) {
+  const idPelicula = parseInt(req.params.id);
+  if (isNaN(idPelicula)) {
     return res.status(400).json({ error: 'ID inválido' });
   }
 
   try {
-    const result = await pool.query('DELETE FROM peliculas WHERE id = $1', [id]);
+    const result = await pool.query('DELETE FROM peliculas WHERE idPelicula = $1', [idPelicula]);
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Película no encontrada' });
     }
@@ -108,7 +105,6 @@ app.delete('/peliculas/:id', async (req, res) => {
     res.status(500).json({ error: 'Error al eliminar película' });
   }
 });
-
 
 // Ruta no encontrada
 app.use((req, res) => {
