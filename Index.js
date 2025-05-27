@@ -106,6 +106,7 @@ app.delete('/peliculas/:id', async (req, res) => {
   }
 });
 
+
 // Ruta no encontrada
 app.use((req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });
