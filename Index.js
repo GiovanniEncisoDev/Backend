@@ -41,7 +41,6 @@ app.get('/peliculas', async (req, res) => {
 });
 
 // Agregar nueva película
-// Agregar nueva película
 app.post('/peliculas', async (req, res) => {
   const { titulo, director, genero, anio, imagen, url } = req.body;
 
@@ -53,18 +52,17 @@ app.post('/peliculas', async (req, res) => {
     const query = `
       INSERT INTO peliculas (titulo, director, genero, anio, imagen, url)
       VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING idPelicula
+      RETURNING *
     `;
     const result = await pool.query(query, [titulo, director, genero, anio, imagen, url]);
-    const nuevaPeliculaId = result.rows[0].idPelicula;
+    const nuevaPelicula = result.rows[0];
 
-    res.status(201).json({ mensaje: 'Película agregada exitosamente', idPelicula: nuevaPeliculaId });
+    res.status(201).json({ mensaje: 'Película agregada exitosamente', pelicula: nuevaPelicula });
   } catch (error) {
     console.error('Error al agregar película:', error);
     res.status(500).json({ error: 'Error al agregar película' });
   }
 });
-
 
 // Modificar una película existente
 app.patch('/peliculas/:id', async (req, res) => {
