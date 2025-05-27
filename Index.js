@@ -53,8 +53,8 @@ app.post('/peliculas', async (req, res) => {
       INSERT INTO peliculas (titulo, director, genero, anio, imagen, url)
       VALUES ($1, $2, $3, $4, $5, $6)
     `;
-    await pool.query(query, [titulo, director, genero, anio, imagen, url]);
-    res.status(201).json({ mensaje: 'Película agregada exitosamente' });
+    const result = await pool.query(query, [titulo, director, genero, anio, imagen, url]);
+    res.status(201).json({ mensaje: 'Película agregada exitosamente', id: result.rows[0].idPelicula });
   } catch (error) {
     console.error('Error al agregar película:', error);
     res.status(500).json({ error: 'Error al agregar película' });
