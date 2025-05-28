@@ -17,13 +17,18 @@ const pool = new Pool({
 
 app.use(express.json());
 
+const cors = require('cors');
+
 const corsOptions = {
   origin: 'https://giovanniencisodev.github.io',
-  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Content-Type']
+  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+  credentials: true
 };
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // 👈 importante para solicitudes preflight
+
 app.use(morgan('dev'));
 app.use(express.static('public'));
 
