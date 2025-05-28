@@ -6,7 +6,6 @@ const { Pool } = require('pg');
 
 const app = express();
 
-// PostgreSQL config
 const pool = new Pool({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
@@ -16,7 +15,6 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
-// Middlewares
 app.use(express.json());
 
 const corsOptions = {
@@ -32,7 +30,7 @@ app.use(express.static('public'));
 // Obtener todas las películas
 app.get('/peliculas', async (req, res) => {
   try {
-    const { rows } = await pool.query('SELECT * FROM peliculas');
+    const { rows } = await pool.query('SELECT * FROM peliculas ORDER BY idPelicula ASC');
     res.json(rows);
   } catch (error) {
     console.error('Error al obtener películas:', error);
@@ -64,7 +62,7 @@ app.post('/peliculas', async (req, res) => {
   }
 });
 
-// Modificar una película existente
+// Modificar película
 app.patch('/peliculas/:id', async (req, res) => {
   const idPelicula = parseInt(req.params.id);
   const { titulo, director, genero, anio, imagen, url } = req.body;
@@ -90,7 +88,7 @@ app.patch('/peliculas/:id', async (req, res) => {
   }
 });
 
-// Eliminar una película
+// Eliminar película
 app.delete('/peliculas/:id', async (req, res) => {
   const idPelicula = parseInt(req.params.id);
   if (isNaN(idPelicula)) {
@@ -109,13 +107,11 @@ app.delete('/peliculas/:id', async (req, res) => {
   }
 });
 
-
 // Ruta no encontrada
 app.use((req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });
 });
 
-// Iniciar servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor ejecutándose en puerto ${PORT}`);
