@@ -17,8 +17,6 @@ const pool = new Pool({
 
 app.use(express.json());
 
-const cors = require('cors');
-
 const corsOptions = {
   origin: 'https://giovanniencisodev.github.io',
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
